@@ -1,6 +1,19 @@
+"""Convolutional neural network for CIFAR-10 classification (Figure 3 reproduction)."""
 import torch.nn as nn
 
+
 def get_cnn(dropout=True):
+    """Create a CNN with architecture c64-c64-c128-1000 for 32x32 RGB images.
+
+    Architecture follows the paper: three conv layers (5×5 kernels) with
+    max-pooling, followed by a fully-connected layer with 1000 units.
+
+    Args:
+        dropout: If True, add 50% dropout after flatten and after FC layer.
+
+    Returns:
+        nn.Sequential: CNN model with optional dropout regularization.
+    """
     # Architecture: c64-c64-c128-1000
     layers = [
         # 3x32x32 -> 64x32x32 -> 64x16x16

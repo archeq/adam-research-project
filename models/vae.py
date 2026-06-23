@@ -1,8 +1,17 @@
+"""Variational Auto-Encoder for bias-correction ablation study (Figure 4 reproduction)."""
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class VAE(nn.Module):
+    """Variational Auto-Encoder with Gaussian latent space.
+
+    Architecture: single hidden layer (softplus) encoder/decoder with
+    500 hidden units and 50 latent dimensions, following the paper's
+    specification for the bias-correction ablation experiment (Figure 4).
+    """
+
     def __init__(self, input_dim=784, hidden_dim=500, latent_dim=50):
         super(VAE, self).__init__()
         
@@ -37,7 +46,19 @@ class VAE(nn.Module):
         recon_logits = self.decode(z)
         return recon_logits, mu, logvar
 
+
 def vae_loss(recon_logits, x, mu, logvar):
+    """Compute the VAE loss: reconstruction (BCE) + KL divergence.
+
+    Args:
+        recon_logits: Decoder output logits (before sigmoid).
+        x: Original binarized input images (flattened).
+        mu: Encoder mean of the latent distribution.
+        logvar: Encoder log-variance of the latent distribution.
+
+    Returns:
+        Per-sample average loss (BCE + KL).
+    """
     # BCE loss
     bce = F.binary_cross_entropy_with_logits(recon_logits, x, reduction='sum')
     
