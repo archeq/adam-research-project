@@ -1,11 +1,31 @@
+"""Custom Adam optimizer with optional bias correction toggle.
+
+Implements the Adam algorithm (Kingma & Ba, 2015) with a flag to
+disable bias correction, used for the Figure 4 ablation study.
+"""
 import math
 import torch
 from torch.optim import Optimizer
 
+
 class AdamUncorrected(Optimizer):
-    """
-    Custom Adam optimizer that optionally disables bias correction,
-    used specifically for replicating the Kingma & Ba (2015) Figure 4 ablation.
+    """Adam optimizer with configurable bias correction.
+
+    This implementation follows Algorithm 1 from Kingma & Ba (2015) but adds
+    a ``bias_correction`` flag that, when set to False, skips the bias
+    correction step (lines 3-4 of the algorithm). This is used to demonstrate
+    the importance of bias correction in the paper's Figure 4 ablation.
+
+    Args:
+        params: Iterable of parameters to optimize.
+        lr (float): Learning rate (alpha). Default: 1e-3.
+        betas (Tuple[float, float]): Coefficients for computing running
+            averages of gradient (beta1) and its square (beta2).
+            Default: (0.9, 0.999).
+        eps (float): Term added to denominator for numerical stability.
+            Default: 1e-8.
+        bias_correction (bool): If True, apply bias correction to moment
+            estimates. If False, use raw (biased) estimates. Default: True.
     """
     def __init__(self, params, lr=1e-3, betas=(0.9, 0.999), eps=1e-8, bias_correction=True):
         if not 0.0 <= lr:
