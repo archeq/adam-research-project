@@ -80,21 +80,19 @@ The logistic regression model classifies MNIST images directly on the 784-dimens
 | Dataset                           | MNIST (60k train / 10k test)           | paper                             |
 | Minibatch size                    | 128                                    | paper                             |
 | Learning rate schedule            | $\alpha_t = \alpha / \sqrt{t}$         | paper                             |
-| Adam $\alpha$                     | 0.001                                  | paper (default)                   |
+| Adam $\alpha$                     | 0.1                                    | *(grid search)*                   |
 | Adam $\beta_1, \beta_2, \epsilon$ | 0.9, 0.999, 10⁻⁸                       | paper (default)                   |
 | SGD momentum                      | 0.9                                    | *(our choice)*                    |
 | L2 regularization $\lambda$       | 1×10⁻⁴                                 | *(our choice)*                    |
 | AdaGrad / SGDNesterov $\alpha$    | grid search over {0.01, 0.1, 0.3, 1.0} | *(our choice, paper unspecified)* |
-| Approximate training epochs       | ~45                                    | inferred from Fig. 1 x-axis       |
+| training epochs                   | 45                                     | inferred from Fig. 1 x-axis       |
+*Figure 1 from the original paper* shows that SGDNesterov converges just a tiny bit slower than Adam while AdaGrad performs significantly worse:
 
-> [!TODO]
-> Run: Adam, SGDNesterov, AdaGrad on MNIST logistic regression.  
-> Plot: **training negative log-likelihood per sample** (y-axis, range ≈ 0.20–0.70) vs. **number of complete passes over the training set / epochs** (x-axis, range 0–45).  
-> Use a running window average to smooth the curves (window ≈ 50–100 batches).  
-> For AdaGrad and SGDNesterov: run the grid search above and keep the best-performing $\alpha$ only.  
-> Expected shape: Adam and SGDNesterov should converge at similar speed to around 0.25–0.30 NLL; AdaGrad should be visibly slower in later epochs.  
-> **Compare with Figure 1 (left) from the paper.**  
-> Caption: *"Reproduction of Figure 1 (left) in Kingma & Ba (2015). Logistic regression training cost (negative log-likelihood) on MNIST images."*
+![Figure 1 original](images/fig1_original_left.png)
+
+Our reproduction of this experiment shows almost identical plots from Adam and SGDNesterov, while for some reason (probably because of unspecified $\alpha$) AdaGrad's curve looks a bit off, but still shows the same trend: 
+
+![Figure 1 reproduction](experiments/results/fig1_reproduction_left.png)
 
 ### IMDB bag-of-words (sparse features)
 
