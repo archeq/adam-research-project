@@ -5,7 +5,6 @@ This repository contains a full PyTorch reproduction of the headline experiments
 ## Structure
 - `experiments/`: Reproduced experiments from the paper.
 - `optimizers/`: Custom `AdamUncorrected` subclass for the ablation study.
-- `results/`: Generated figures.
 - `report.md`: The scientific report.
 
 ## Requirements
@@ -14,15 +13,11 @@ This repository contains a full PyTorch reproduction of the headline experiments
 - `matplotlib`
 - `numpy`
 
+Install with:
+```shell
+pip install -r requirements.txt
+```
+
 ## How to Reproduce
-Run all experiments with a single command:
-
-```shell
-python main.py --all
-```
-Results will be saved under `results/fig<N>_reproduction`.
-
-or run one of 4 individual experiments (`logistic`, `multilayer`, `convolutional`, `ablation`) using:
-```shell
-python main.py --experiment <experiment_name>
-```
+Experiment reproduces 4 figures from the paper. Each one has corresponding jupyter notebook designated for it located in 
+`experiments/` directory and their outcomes (figure reproductions) at `experiments/results/`
