@@ -87,13 +87,8 @@ The logistic regression model classifies MNIST images directly on the 784-dimens
 | AdaGrad / SGDNesterov $\alpha$    | grid search over {0.01, 0.1, 0.3, 1.0} | *(our choice, paper unspecified)* |
 | training epochs                   | 45                                     | inferred from Fig. 1 x-axis       |
 *Figure 1 from the original paper* shows that SGDNesterov converges just a tiny bit slower than Adam while AdaGrad performs significantly worse:
-
-![Figure 1 original](images/fig1_original_left.png)
-
-Our reproduction of this experiment shows almost identical plots from Adam and SGDNesterov, while for some reason (probably because of unspecified $\alpha$) AdaGrad's curve looks a bit off, but still shows the same trend: 
-
-![Figure 1 reproduction](experiments/results/fig1_reproduction_left.png)
-
+![[Pasted image 20260626161458.png|706]]
+Our reproduction of this experiment shows almost identical plots from Adam and SGDNesterov, while for some reason (probably because of unspecified $\alpha$) AdaGrad's curve looks a bit off, but still shows the same trend:![[fig1_reproduction_left.png]]
 ### IMDB bag-of-words (sparse features)
 
 This sub-experiment uses sparse bag-of-words (BoW) features to test the optimizers in a regime where AdaGrad's per-feature adaptation is most valuable.
@@ -131,37 +126,41 @@ The second experiment uses a two-layer fully connected network on MNIST. This in
 | Regularization (stochastic)   | dropout                                        | paper                          |
 | Loss                          | cross-entropy                                  | paper                          |
 | Optimizers (stochastic)       | Adam, AdaGrad, RMSProp, SGDNesterov, AdaDelta  | paper                          |
-| Approximate training epochs   | ~200                                           | inferred from Fig. 2(a) x-axis |
+| Training epochs               | 200                                            | inferred from Fig. 2(a) x-axis |
 | Loss function (deterministic) | cross-entropy + L2 weight decay                | paper                          |
 | Dropout rate                  | 0.5                                            | *(our choice)*                 |
 | L2 weight decay $\lambda$     | 1×10⁻⁴                                         | *(our choice)*                 |
 | Weight initialization         | Glorot uniform                                 | *(our choice)*                 |
+We've ran grid search for learning rates $\alpha$ as paper suggests:
+- Adam over $\{10^{-4}, 10^{-3}, 10^{-2}\}$; Best result was achieved with $\alpha=10^{-4}$
+- SGDNesterov over $\{10^{-2}, 10^{-1}, 0.3, 1.0\}$; Best result was achieved with $\alpha=10^{-2}$
+- AdaGrad over $\{10^{-3}, 10^{-2}, 10^{-1}, 0.3\}$; Best result was achieved with $\alpha=10^{-2}$
+- RMSProp over $\{10^{-4}, 10^{-3}, 10^{-2}\}$; Best result was achieved with $\alpha=10^{-4}$
+- AdaDelta (scaling factor) over $\{0.1, 1.0, 5.0\}$; Best result was achieved with $10^{-1}$
 
-> [!TODO]
-> Two sub-plots are needed here, corresponding to Figure 2(a) and 2(b) in the paper.  
-> **Plot 2(a):** Training cost (log scale, y-axis ≈ 10⁻² to 10⁻¹) vs. epochs (x-axis, 0–200) for Adam, AdaGrad, RMSProp, SGDNesterov, AdaDelta — all with dropout.  
-> Expected shape: Adam converges fastest or near-fastest; all adaptive methods outperform SGDNesterov.  
-> **Plot 2(b):** Training cost (log scale) vs. epochs for Adam vs. SFO on the deterministic (no dropout) objective. SFO is skipped — replace with a note in the reproducibility section and omit this subplot, or compare Adam vs. SGDNesterov on the deterministic objective instead as a proxy.  
-> **Compare with Figure 2 from the paper.**  
-> Caption: *"Reproduction of Figure 2(a) in Kingma & Ba (2015). Training cost of a two-layer MLP on MNIST with dropout regularization."*
+**Problem:**
+Section 6.2 of the paper explicitly says: _"the standard deterministic cross-entropy objective function with L2 weight decay on the parameters to prevent over-fitting."_ It does not explicitly say whether L2 is also applied in the stochastic case. We've decided to use $10^{-4}$ decay as in first experiment. 
+Same applies to normalization which we decided to also use.
 
+**Original figure (2a)**
+![](images/fig2a_original.png)
 ## Convolutional neural networks
 
 The third experiment uses a convolutional network on CIFAR-10. Unlike fully connected networks, CNNs exhibit highly varying gradient magnitudes across layers, making per-parameter learning rate adaptation particularly relevant.
 
-| Parameter                   | Value                                                       | Source                      |
-| --------------------------- | ----------------------------------------------------------- | --------------------------- |
-| Dataset                     | CIFAR-10 (50k train / 10k test, 32×32 RGB)                  | paper                       |
-| Architecture                | 3× [5×5 conv → 3×3 max-pool (stride 2)], FC 1000 units ReLU | paper                       |
-| Filter counts               | 64, 64, 128 (c64-c64-c128-1000)                             | paper (figure caption)      |
-| Input preprocessing         | whitening                                                   | paper                       |
-| Dropout                     | applied to input layer and FC layer                         | paper                       |
-| Minibatch size              | 128                                                         | paper                       |
-| Optimizers                  | Adam, AdaGrad, SGDNesterov (with and without dropout)       | paper                       |
-| Approximate training epochs | ~45                                                         | inferred from Fig. 3 x-axis |
-| Exact whitening method      | per-channel mean subtraction + std normalization            | *(our choice)*              |
-| Dropout rate                | 0.5 on FC, 0.2 on input                                     | *(our choice)*              |
-| Weight initialization       | Kaiming uniform                                             | *(our choice)*              |
+| Parameter              | Value                                                       | Source                      |
+| ---------------------- | ----------------------------------------------------------- | --------------------------- |
+| Dataset                | CIFAR-10 (50k train / 10k test, 32×32 RGB)                  | paper                       |
+| Architecture           | 3× [5×5 conv → 3×3 max-pool (stride 2)], FC 1000 units ReLU | paper                       |
+| Filter counts          | 64, 64, 128 (c64-c64-c128-1000)                             | paper (figure caption)      |
+| Input preprocessing    | whitening                                                   | paper                       |
+| Dropout                | applied to input layer and FC layer                         | paper                       |
+| Minibatch size         | 128                                                         | paper                       |
+| Optimizers             | Adam, AdaGrad, SGDNesterov (with and without dropout)       | paper                       |
+| Training epochs        | 45                                                          | inferred from Fig. 3 x-axis |
+| Exact whitening method | per-channel mean subtraction + std normalization            | *(our choice)*              |
+| Dropout rate           | 0.5 on FC, 0.2 on input                                     | *(our choice)*              |
+| Weight initialization  | Kaiming uniform                                             | *(our choice)*              |
 
 > [!TODO]
 > Two sub-plots are needed, corresponding to Figure 3 (left) and (right).  
